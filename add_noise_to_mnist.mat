@@ -1,0 +1,45 @@
+ clear;
+% 
+  [images, labels] = mnist_parse('train-images-idx3-ubyte', 'train-labels-idx1-ubyte');
+%  
+  eps = 10;
+ sensity = 1;
+
+ images_n=zeros(28,28,6000,'uint8');
+numcol=28;
+numrow=28;
+ size = 60000;
+
+ 
+%  write back
+ fileID = fopen('train-images-idx3-ubyte-noise','w');
+ fwrite(fileID,swapbytes(uint32(2051)),'uint32');
+ fwrite(fileID,swapbytes(uint32(60000)),'uint32');
+ fwrite(fileID,swapbytes(uint32(28)),'uint32'),
+fwrite(fileID,swapbytes(uint32(28)),'uint32'),
+
+% add noise 
+ for k = 1: size   
+     image =  images(:,:,k);
+     noise1 =dp_noise(image, eps ,255);
+    noise=uint8(round(noise1));
+    image_n = image +noise; 
+    images_n(:,:,k)=image_n;
+    
+%     write to file
+    image_uint8=reshape(images_n(:,:,k)',numcol*numrow,1);
+    fwrite(fileID,swapbytes(uint8(image_uint8)),'uint8');
+ end
+
+%  write the un noise
+% for k = 1: size
+%     image_uint8=reshape(images(:,:,k)',numcol*numrow,1);
+%     fwrite(fileID,swapbytes(uint8(image_uint8)),'uint8');
+% end
+
+fclose(fileID);
+ 
+ 
+subplot(1,2,1), imshow(images(:,:,1));
+subplot(1,2,2),imshow(images_n(:,:,1));
+ 
